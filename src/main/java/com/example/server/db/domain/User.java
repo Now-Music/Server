@@ -1,6 +1,8 @@
 package com.example.server.db.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 
@@ -10,11 +12,15 @@ import javax.annotation.Generated;
 import java.util.List;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Document(collection = "Users")
 public class User {
 
     @Id
-    private String id;
+    private Integer id;
+
+    private String loginId;
     private String password;
     private String name;
     private int age;
@@ -22,9 +28,9 @@ public class User {
     private List<Genre> favoriteGenre;
 
 
-    public User(String id,String password,String name,int age, List<Genre> favoriteGenre)
+    public User(String loginId,String password,String name,int age, List<Genre> favoriteGenre)
     {
-        this.id = id;
+        this.loginId = loginId;
         this.password = password;
         this.name = name;
         this.age = age;

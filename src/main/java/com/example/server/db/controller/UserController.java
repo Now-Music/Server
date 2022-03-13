@@ -211,7 +211,7 @@ public class UserController {
 
     // id에 맞는 유저 찾기
     @GetMapping("/members/{id}")
-    public ResponseEntity getUserById(@PathVariable("id") String id)
+    public ResponseEntity getUserById(@PathVariable("id") Integer id)
     {
         try
         {
@@ -230,10 +230,11 @@ public class UserController {
     @PostMapping("/members")
     public ResponseEntity addUser(@RequestBody User user)
     {
-
+        List userLists = userRepository.findAll();
+        int userNumber = userLists.size();
         try
         {
-            User newU = new User(user.getId(), user.getPassword(),user.getName(),user.getAge(),
+            User newU = new User(userNumber+1,user.getLoginId(), user.getPassword(),user.getName(),user.getAge(),
                     user.getFavoriteGenre());
             User newUser  = userRepository.save(newU);
 
@@ -246,7 +247,7 @@ public class UserController {
     }
 
     @PutMapping("/members/{id}")
-    public ResponseEntity updateUser(@PathVariable("id") String id, @RequestBody User user)
+    public ResponseEntity updateUser(@PathVariable("id") Integer id, @RequestBody User user)
     {
         Optional userOptional = userRepository.findById(id);
 
@@ -267,7 +268,7 @@ public class UserController {
     }
 
     @DeleteMapping("/members/{id}")
-    public ResponseEntity deleteUser(@PathVariable("id") String id)
+    public ResponseEntity deleteUser(@PathVariable("id") Integer id)
     {
         try
         {
