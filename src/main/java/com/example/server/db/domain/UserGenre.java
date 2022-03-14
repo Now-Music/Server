@@ -5,8 +5,7 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 
 @Data
-//@Entity
-public class Genre {
+public class UserGenre {
 
     @Id
     private String type;

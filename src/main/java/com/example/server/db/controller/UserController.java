@@ -160,7 +160,6 @@
 
 package com.example.server.db.controller;
 
-import com.example.server.db.domain.Genre;
 import com.example.server.db.domain.User;
 import com.example.server.db.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -181,7 +180,7 @@ public class UserController {
     UserRepository userRepository;
 
     // 로그인 아이디 비밀번호에 맞는 유저 찾기.
-    @GetMapping("/members")
+    @GetMapping("/members/login")
     public ResponseEntity<List> getAllUsers(@RequestParam(required = false) String userId,String password)
     {
         try
@@ -193,7 +192,21 @@ public class UserController {
             }
             else
             {
-                memberList.addAll(userRepository.findByIdAndPassword(userId,password));
+                System.out.println("test2");
+                System.out.println(userRepository.findByUserId(userId));
+                List findId = userRepository.findByUserId(userId);
+
+                for (Object o : findId) {
+                    User findUser = (User) o;
+                   // System.out.println("user's password" +findUser.getPassword());
+                    if(findUser.getPassword().equals(password))
+                    {
+                        memberList.add(findUser);
+                        System.out.println("Success LOGIN!!");
+                        break;
+                    }
+                }
+
             }
 
             if(memberList.isEmpty())
@@ -209,15 +222,16 @@ public class UserController {
         }
     }
 
+
     // id에 맞는 유저 찾기
     @GetMapping("/members/{id}")
     public ResponseEntity getUserById(@PathVariable("id") Integer id)
     {
         try
         {
-            Optional bookOptional = userRepository.findById(id);
+            Optional memberOptional = userRepository.findById(id);
 
-            return new ResponseEntity<>(bookOptional.get(), HttpStatus.OK);
+            return new ResponseEntity<>(memberOptional.get(), HttpStatus.OK);
         }
         catch (Exception e)
         {
@@ -234,7 +248,7 @@ public class UserController {
         int userNumber = userLists.size();
         try
         {
-            User newU = new User(userNumber+1,user.getLoginId(), user.getPassword(),user.getName(),user.getAge(),
+            User newU = new User(userNumber+1,user.getUserId(), user.getPassword(),user.getName(),user.getAge(),
                     user.getFavoriteGenre());
             User newUser  = userRepository.save(newU);
 
@@ -246,6 +260,9 @@ public class UserController {
         }
     }
 
+    /**
+     * 유저 정보 수정
+     */
     @PutMapping("/members/{id}")
     public ResponseEntity updateUser(@PathVariable("id") Integer id, @RequestBody User user)
     {

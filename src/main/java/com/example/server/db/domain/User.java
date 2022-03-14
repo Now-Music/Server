@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import org.springframework.data.annotation.Id;
 
-import javax.annotation.Generated;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -20,20 +20,28 @@ public class User {
     @Id
     private Integer id;
 
-    private String loginId;
+    private String userId;
     private String password;
     private String name;
     private int age;
 
-    private List<Genre> favoriteGenre;
 
+    private List<UserGenre> favoriteGenre;
 
-    public User(String loginId,String password,String name,int age, List<Genre> favoriteGenre)
+    private List<Integer> likeMusicIds;
+    private List<Integer> dislikeMusicIds;
+    private List<Integer> nowPlaying;
+
+    public User(Integer id, String userId,String password,String name,int age, List<UserGenre> favoriteGenre)
     {
-        this.loginId = loginId;
+        this.id = id;
+        this.userId = userId;
         this.password = password;
         this.name = name;
         this.age = age;
         this.favoriteGenre = favoriteGenre;
+        this.likeMusicIds = new ArrayList<>();
+        this.dislikeMusicIds = new ArrayList<>();
+        this.nowPlaying = new ArrayList<>();
     }
 }

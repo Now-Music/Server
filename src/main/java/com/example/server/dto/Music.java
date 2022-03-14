@@ -20,6 +20,6 @@
 //    private String songName;
 //
 //    //@OneToOne(fetch = LAZY)
-//    private Genre song_gn_gnr;
+//    private UserGenre song_gn_gnr;
 //
 //}
