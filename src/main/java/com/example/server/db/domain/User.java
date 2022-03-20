@@ -23,16 +23,17 @@ public class User {
     private String userId;
     private String password;
     private String name;
-    private int age;
+    private String age;
 
+    private String favoriteGenre;
 
-    private List<UserGenre> favoriteGenre;
+//    private List<UserGenre> favoriteGenre;
 
     private List<Integer> likeMusicIds;
     private List<Integer> dislikeMusicIds;
     private List<Integer> nowPlaying;
 
-    public User(Integer id, String userId,String password,String name,int age, List<UserGenre> favoriteGenre)
+    public User(Integer id, String userId,String password,String name,String age, String favoriteGenre)
     {
         this.id = id;
         this.userId = userId;

@@ -162,6 +162,7 @@ package com.example.server.db.controller;
 
 import com.example.server.db.domain.User;
 import com.example.server.db.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -171,6 +172,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @CrossOrigin("http://localhost:8080")
 @RestController
 @RequestMapping("/db/user")
@@ -179,7 +181,13 @@ public class UserController {
     @Autowired
     UserRepository userRepository;
 
-    // 로그인 아이디 비밀번호에 맞는 유저 찾기.
+
+
+    /**
+     * 로그인
+     * 실패 하면 -> Error reponse
+     * 성공시 -> 유저 정보 띄워주기.
+     */
     @GetMapping("/members/login")
     public ResponseEntity<List> getAllUsers(@RequestParam(required = false) String userId,String password)
     {
@@ -192,25 +200,34 @@ public class UserController {
             }
             else
             {
-                System.out.println("test2");
-                System.out.println(userRepository.findByUserId(userId));
-                List findId = userRepository.findByUserId(userId);
-
-                for (Object o : findId) {
-                    User findUser = (User) o;
-                   // System.out.println("user's password" +findUser.getPassword());
-                    if(findUser.getPassword().equals(password))
+               // System.out.println(userRepository.findByUserId(userId));
+                User findId = userRepository.findByUserId(userId);
+                if(findId != null)
+                {
+                    if(findId.getPassword().equals(password))
                     {
-                        memberList.add(findUser);
-                        System.out.println("Success LOGIN!!");
-                        break;
+                        memberList.add(findId);
+                        log.info("Success Login! memberList={} ",memberList);
                     }
                 }
+
+//                for (Object o : findId) {
+//                    User findUser = (User) o;
+//
+//                   // System.out.println("user's password" +findUser.getPassword());
+//                    if(findUser.getPassword().equals(password))
+//                    {
+//                        memberList.add(findUser);
+//                        System.out.println("Success LOGIN!!");
+//                        break;
+//                    }
+//                }
 
             }
 
             if(memberList.isEmpty())
             {
+                System.out.println("NOT FOUND USER!");
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
 
@@ -218,6 +235,7 @@ public class UserController {
         }
         catch (Exception e)
         {
+            System.out.println("Error Login!");
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -245,7 +263,9 @@ public class UserController {
     public ResponseEntity addUser(@RequestBody User user)
     {
         List userLists = userRepository.findAll();
+
         int userNumber = userLists.size();
+        System.out.println(userRepository.findByUserId(user.getUserId()));
         try
         {
             User newU = new User(userNumber+1,user.getUserId(), user.getPassword(),user.getName(),user.getAge(),
@@ -258,6 +278,7 @@ public class UserController {
         {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
     }
 
     /**
@@ -284,6 +305,10 @@ public class UserController {
         }
     }
 
+    /**
+     * 유저 삭제
+     *
+     */
     @DeleteMapping("/members/{id}")
     public ResponseEntity deleteUser(@PathVariable("id") Integer id)
     {

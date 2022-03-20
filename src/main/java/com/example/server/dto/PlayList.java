@@ -8,7 +8,7 @@
 //@Data
 ////@Entity
 //@Document(collection = "playList")
-//public class PlayList {
+//public class MusicList {
 //    @Id
 //    //@GeneratedValue
 //    private Integer id;

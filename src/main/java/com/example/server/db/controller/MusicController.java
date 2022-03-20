@@ -87,14 +87,17 @@ public class MusicController {
     public ResponseEntity<List> addMusics(@RequestBody List<Music> musics )
     {
         List musicList = musicRepository.findAll();
+
         try
         {
             for (Music music : musics) {
 
                 // 음악의 장르 정보 찾아서 저장.
                 String genreId = music.getGenre();
+
                 Optional optionalGenre = genreRepository.findById(genreId);
                 MusicGenre mg = (MusicGenre) optionalGenre.get();
+
 
                 Music newMusic = new Music(music.getId(),music.getTitle(),music.getArtist(),mg.getGenre(),music.getAlbum());
                 Music saveMusic = musicRepository.save(newMusic);
@@ -104,6 +107,7 @@ public class MusicController {
         }
         catch (Exception e)
         {
+            System.out.println("오류");
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
