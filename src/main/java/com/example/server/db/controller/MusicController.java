@@ -2,7 +2,6 @@ package com.example.server.db.controller;
 
 import com.example.server.db.domain.Music;
 import com.example.server.db.domain.MusicGenre;
-import com.example.server.db.domain.User;
 import com.example.server.db.repository.GenreRepository;
 import com.example.server.db.repository.MusicRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,21 +86,28 @@ public class MusicController {
     public ResponseEntity<List> addMusics(@RequestBody List<Music> musics )
     {
         List musicList = musicRepository.findAll();
-
+        int i = 0;
         try
         {
+            System.out.println(" musics size : "+musics.size());
             for (Music music : musics) {
-
+                //System.out.println(i);
                 // 음악의 장르 정보 찾아서 저장.
+                if(music.getGenre() == null || music.getGenre().equals("")) continue;
                 String genreId = music.getGenre();
-
+                if(genreId == null || genreId.equals("")) continue;
                 Optional optionalGenre = genreRepository.findById(genreId);
+                if(optionalGenre.equals(Optional.empty()))
+                {
+                    System.out.println("repo error");
+                    continue;
+                }
                 MusicGenre mg = (MusicGenre) optionalGenre.get();
-
 
                 Music newMusic = new Music(music.getId(),music.getTitle(),music.getArtist(),mg.getGenre(),music.getAlbum());
                 Music saveMusic = musicRepository.save(newMusic);
-                musicList.add(saveMusic);
+                //musicList.add(saveMusic);
+                //i+=1;
             }
             return new ResponseEntity<>(musicList, HttpStatus.CREATED);
         }

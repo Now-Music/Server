@@ -41,3 +41,8 @@ src/main/java/com/example/server/mongoLibrary/
 src/main/resources/pom.xml
 application-mongo.properties
 
+gradlew.bat
+gradlew
+HELP.md
+gradle
+

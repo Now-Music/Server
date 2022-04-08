@@ -1,20 +1,21 @@
 package com.example.server.db.controller;
 
-import com.example.server.db.domain.ClientInfo;
-import com.example.server.db.domain.MusicList;
-import com.example.server.db.domain.User;
+import com.example.server.db.domain.*;
+import com.example.server.db.repository.MusicRepository;
 import com.example.server.db.repository.UserRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @CrossOrigin("http://localhost:8080")
@@ -23,6 +24,11 @@ import org.springframework.web.client.RestTemplate;
 public class ClientController {
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    MusicRepository musicRepository;
+    @Autowired
+    private static final List<RecommendMusic> rm = new ArrayList<>();
+
 
     /**
      * client로 부터 추천 음악 요청 들어 온 경우
@@ -30,49 +36,68 @@ public class ClientController {
      * 감정 분석 할 수 있도록 python 서버로 다시 보내준다.
      */
     @PostMapping("")
-    public String recommedMusics(@RequestBody ClientInfo clientInfo) throws JsonProcessingException {
+    public List<RecommendMusic> recommedMusics(@RequestBody ClientInfo clientInfo) throws JsonProcessingException {
+
         String userId = clientInfo.getUser_id();
+        User loginUser = userRepository.findByUserId(userId);
+        clientInfo.setMonth(clientInfo.getMonth());
+        clientInfo.setGenres(loginUser.getFavoriteGenre());
+        clientInfo.setUser_age(loginUser.getAge());
 
-        User loginedUser = userRepository.findByUserId(userId);
 
-        clientInfo.setGenres(loginedUser.getFavoriteGenre());
-        clientInfo.setUser_age(loginedUser.getAge());
+        try{
+            RestTemplate restTemplate = new RestTemplate();
 
-        // 이제 python 서버에 보내기.(clientInfo 정보)
+            // 요청 메시지에 필요한 파라미터들
+            String url = "";
 
-        RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 
-        // 요청 메시지에 필요한 파라미터들
-        String url = "http://{일준이}";
+            MultiValueMap<String,ClientInfo> body = new LinkedMultiValueMap<>();
+            body.add("data",clientInfo);
 
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+            // 요청 메시지
+            HttpEntity<?> requestMessage = new HttpEntity<>(body,httpHeaders);
 
-        MultiValueMap<String,ClientInfo> body = new LinkedMultiValueMap<>();
-        body.add("data",clientInfo);
+            // 응답 메시지 ( 노래 리스트가 오겠지?)
+//            HttpEntity<String> response = restTemplate.postForEntity(url,requestMessage,String.class);
+            HttpEntity<String> response = restTemplate.postForEntity(url,requestMessage,String.class);
 
-        // 요청 메시지
-        HttpEntity<?> requestMessage = new HttpEntity<>(body,httpHeaders);
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode js = objectMapper.readTree(response.getBody());
+            System.out.println(js.get("id_list"));
 
-        // 응답 메시지 ( 노래 리스트가 오겠지?)
-        HttpEntity<String> response = restTemplate.postForEntity(url,requestMessage,String.class);
+            List<String> musicIdLists = js.findValuesAsText("id_list");
 
-        // 추천된 노래 리스트들.
-        ObjectMapper objectMapper = new ObjectMapper();
-        MusicList recommendList = objectMapper.readValue(response.getBody(), MusicList.class);
+            //JsonNode musicIdLists = js.get("id_list");
 
-        // 다시 client에 노래 리스트(정보들) 보내주기.
-        restTemplate = new RestTemplate();
+            //List<RecommendMusic> list = new ArrayList<>();
 
-        url = "http://{윤종}";
-        MultiValueMap<String,MusicList> returnBody = new LinkedMultiValueMap<>();
-        returnBody.add("List",recommendList);
+            //                Music music = musicRepository.findByMusicId(id);
+//            musicIdLists.forEach(id ->{
+//                Music findMusic = musicRepository.findById(musicIdLists.get(Integer.parseInt(id)));
+//                RecommendMusic recommendMusic = new RecommendMusic(findMusic.getTitle(), findMusic.getArtist(), findMusic.getAlbum());
+//                rm.add(recommendMusic);
+//            });
 
-        // 최종 응답 메시지
-        HttpEntity<String> returnResponse = restTemplate.postForEntity(url,requestMessage,String.class);
-        log.info("response = {}",returnResponse);
-        return "ok";
+            rm.add(new RecommendMusic("song1","beomsic","album1"));
+            rm.add(new RecommendMusic("song2","hwan","album2"));
+            rm.add(new RecommendMusic("song4","joon","album3"));
+            rm.add(new RecommendMusic("song3","yoon","album4"));
+            rm.add(new RecommendMusic("song5","beom","album5"));
+            rm.add(new RecommendMusic("song6","kang","album6"));
+
+            return rm;
+        }catch (Exception e)
+        {
+            return rm;
+        }
+
     }
+
+
+
 
     /**
      * 노래 좋아요 누른 경우.

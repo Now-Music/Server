@@ -210,18 +210,10 @@ public class UserController {
                         log.info("Success Login! memberList={} ",memberList);
                     }
                 }
-
-//                for (Object o : findId) {
-//                    User findUser = (User) o;
-//
-//                   // System.out.println("user's password" +findUser.getPassword());
-//                    if(findUser.getPassword().equals(password))
-//                    {
-//                        memberList.add(findUser);
-//                        System.out.println("Success LOGIN!!");
-//                        break;
-//                    }
-//                }
+                else
+                {
+                    return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+                }
 
             }
 
@@ -265,14 +257,18 @@ public class UserController {
         List userLists = userRepository.findAll();
 
         int userNumber = userLists.size();
-        System.out.println(userRepository.findByUserId(user.getUserId()));
+        //System.out.println(userRepository.findByUserId(user.getUserId()));
         try
         {
-            User newU = new User(userNumber+1,user.getUserId(), user.getPassword(),user.getName(),user.getAge(),
-                    user.getFavoriteGenre());
-            User newUser  = userRepository.save(newU);
+            if(userRepository.findByUserId(user.getUserId())==null)
+            {
+                User newU = new User(userNumber+1,user.getUserId(), user.getPassword(),user.getName(),user.getAge(),
+                        user.getFavoriteGenre());
+                User newUser  = userRepository.save(newU);
 
-            return new ResponseEntity<>(newUser, HttpStatus.CREATED);
+                return new ResponseEntity<>(newUser, HttpStatus.CREATED);
+            }
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         catch (Exception e)
         {
